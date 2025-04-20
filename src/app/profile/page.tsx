@@ -45,7 +45,7 @@ const savedRecipes = [
     title: "寿司拼盘",
     image: "https://images.unsplash.com/photo-1579871494447-9811cf80d66c?q=80&w=2070&auto=format&fit=crop",
     rating: 4.9,
-    author: "王师傅"
+    author: "王师傅1"
   },
   {
     id: 5,
