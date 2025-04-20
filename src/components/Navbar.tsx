@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
-import { Menu, X, Search, User } from "lucide-react";
+import { Menu, X, Search, User, Bookmark } from "lucide-react";
 import { useSession, signOut } from "next-auth/react";
 
 export default function Navbar() {
@@ -53,7 +53,21 @@ export default function Navbar() {
             </div>
             {session ? (
               <div className="flex items-center space-x-4">
-                <Link href="/profile" className="flex items-center space-x-1 text-sm font-medium">
+                <Link 
+                  href="/collections" 
+                  className={`flex items-center space-x-1 text-sm font-medium ${
+                    pathname.startsWith('/collections') ? 'text-[color:var(--primary)]' : ''
+                  }`}
+                >
+                  <Bookmark className="h-4 w-4" />
+                  <span>收藏夹</span>
+                </Link>
+                <Link 
+                  href="/profile" 
+                  className={`flex items-center space-x-1 text-sm font-medium ${
+                    pathname === '/profile' ? 'text-[color:var(--primary)]' : ''
+                  }`}
+                >
                   <User className="h-4 w-4" />
                   <span>{session.user?.name || '用户'}</span>
                 </Link>
@@ -122,6 +136,13 @@ export default function Navbar() {
               <div className="mt-3 space-y-1 px-2">
                 {session ? (
                   <>
+                    <Link
+                      href="/collections"
+                      className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 dark:text-gray-200 hover:text-[color:var(--primary)]"
+                      onClick={() => setIsMenuOpen(false)}
+                    >
+                      我的收藏夹
+                    </Link>
                     <Link
                       href="/profile"
                       className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 dark:text-gray-200 hover:text-[color:var(--primary)]"

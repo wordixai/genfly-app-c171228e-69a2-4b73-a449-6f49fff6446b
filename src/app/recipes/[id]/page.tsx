@@ -1,8 +1,14 @@
+"use client";
+
+import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { Clock, Users, ChefHat, Star } from "lucide-react";
+import { Clock, Users, ChefHat, Star, Bookmark, Share2 } from "lucide-react";
+import { useSession } from "next-auth/react";
 import RecipeReviews from "@/components/RecipeReviews";
 import AddReviewForm from "@/components/AddReviewForm";
+import FavoriteButton from "@/components/FavoriteButton";
+import CollectionModal from "@/components/CollectionModal";
 
 // 模拟食谱数据
 const recipe = {
@@ -42,6 +48,25 @@ const recipe = {
 };
 
 export default function RecipePage({ params }: { params: { id: string } }) {
+  const { data: session } = useSession();
+  const [isCollectionModalOpen, setIsCollectionModalOpen] = useState(false);
+  const [isFavorited, setIsFavorited] = useState(false);
+
+  const handleShareRecipe = () => {
+    if (navigator.share) {
+      navigator.share({
+        title: recipe.title,
+        text: recipe.description,
+        url: window.location.href,
+      }).catch((error) => console.log('分享失败', error));
+    } else {
+      // 复制链接到剪贴板
+      navigator.clipboard.writeText(window.location.href)
+        .then(() => alert('链接已复制到剪贴板'))
+        .catch((err) => console.error('无法复制链接: ', err));
+    }
+  };
+
   return (
     <div className="container py-12">
       <div className="mb-8">
@@ -62,7 +87,25 @@ export default function RecipePage({ params }: { params: { id: string } }) {
             />
           </div>
 
-          <h1 className="text-4xl font-bold mb-4">{recipe.title}</h1>
+          <div className="flex justify-between items-start mb-4">
+            <h1 className="text-4xl font-bold">{recipe.title}</h1>
+            <div className="flex space-x-2">
+              <button
+                onClick={() => setIsCollectionModalOpen(true)}
+                className="flex items-center justify-center p-2 bg-white dark:bg-gray-800 rounded-full shadow-md hover:bg-gray-100 dark:hover:bg-gray-700"
+                aria-label="收藏到收藏夹"
+              >
+                <Bookmark className="h-5 w-5" />
+              </button>
+              <button
+                onClick={handleShareRecipe}
+                className="flex items-center justify-center p-2 bg-white dark:bg-gray-800 rounded-full shadow-md hover:bg-gray-100 dark:hover:bg-gray-700"
+                aria-label="分享食谱"
+              >
+                <Share2 className="h-5 w-5" />
+              </button>
+            </div>
+          </div>
           
           <div className="flex items-center mb-6">
             <div className="flex items-center">
@@ -78,6 +121,13 @@ export default function RecipePage({ params }: { params: { id: string } }) {
               ))}
               <span className="ml-2 text-lg font-medium">{recipe.rating}</span>
               <span className="ml-1 text-gray-500">({recipe.reviewCount} 评价)</span>
+            </div>
+            <div className="ml-auto">
+              <FavoriteButton 
+                recipeId={params.id} 
+                initialIsFavorited={isFavorited}
+                showText={true}
+              />
             </div>
           </div>
 
@@ -171,13 +221,14 @@ export default function RecipePage({ params }: { params: { id: string } }) {
                       className="object-cover"
                     />
                   </div>
-                  <div className="ml-4">
+                  <div className="ml-4 flex-grow">
                     <h4 className="font-medium">东坡肉</h4>
                     <div className="flex items-center">
                       <Star className="h-3 w-3 text-yellow-500 fill-yellow-500" />
                       <span className="ml-1 text-xs">4.7</span>
                     </div>
                   </div>
+                  <FavoriteButton recipeId="2" />
                 </div>
                 <div className="flex items-center">
                   <div className="relative h-16 w-16 rounded overflow-hidden">
@@ -188,13 +239,14 @@ export default function RecipePage({ params }: { params: { id: string } }) {
                       className="object-cover"
                     />
                   </div>
-                  <div className="ml-4">
+                  <div className="ml-4 flex-grow">
                     <h4 className="font-medium">糖醋排骨</h4>
                     <div className="flex items-center">
                       <Star className="h-3 w-3 text-yellow-500 fill-yellow-500" />
                       <span className="ml-1 text-xs">4.6</span>
                     </div>
                   </div>
+                  <FavoriteButton recipeId="3" />
                 </div>
                 <div className="flex items-center">
                   <div className="relative h-16 w-16 rounded overflow-hidden">
@@ -205,19 +257,27 @@ export default function RecipePage({ params }: { params: { id: string } }) {
                       className="object-cover"
                     />
                   </div>
-                  <div className="ml-4">
+                  <div className="ml-4 flex-grow">
                     <h4 className="font-medium">红烧鱼</h4>
                     <div className="flex items-center">
                       <Star className="h-3 w-3 text-yellow-500 fill-yellow-500" />
                       <span className="ml-1 text-xs">4.5</span>
                     </div>
                   </div>
+                  <FavoriteButton recipeId="4" />
                 </div>
               </div>
             </div>
           </div>
         </div>
       </div>
+
+      <CollectionModal 
+        isOpen={isCollectionModalOpen}
+        onClose={() => setIsCollectionModalOpen(false)}
+        recipeId={params.id}
+        recipeTitle={recipe.title}
+      />
     </div>
   );
 }
